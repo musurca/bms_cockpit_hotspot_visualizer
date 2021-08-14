@@ -320,6 +320,11 @@ void export() {
 }
 
 void importHotspots() {
+  // clear any selection
+  hoverIndex = -1;
+  selectIndex = -1;
+  
+  // reinit data
   initTables();
   
   // Import the hotspots
@@ -388,7 +393,6 @@ void importHotspots() {
 
 void setup() {
   size(1024, 768, P3D);
-  frameRate(60);
   surface.setTitle("BMS Cockpit Hotspot Visualizer - v" + VERSION);
   //surface.setResizable(true);
   
