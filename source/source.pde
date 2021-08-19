@@ -3,7 +3,7 @@ import java.util.*;
 import damkjer.ocd.*;
 import controlP5.*;
 
-String VERSION = "0.1";
+String VERSION = "0.2";
 
 float DEFAULT_MOVE_AMT = 0.001;
 int DEFAULT_SOUND = 122;
@@ -11,6 +11,8 @@ int DEFAULT_SIZE = 20;
 String SEPARATOR = "                                                                 ";
 
 float moveAmt = DEFAULT_MOVE_AMT;
+
+File lastExportFile = null;
 
 ControlP5 gui;
 Group hotspotCtrl;
@@ -193,54 +195,37 @@ void makeGUI() {
   hotspotCtrl.hide();
   
   fileCtrl = gui.addGroup("File")
-                .setPosition(width-300, 10)
-                .setSize(300, 0)
-                .setBackgroundHeight(110)
+                .setPosition(width-100, 10)
+                .setSize(100, 0)
+                .setBackgroundHeight(90)
                 .setBackgroundColor(color(255,90))
                 ;
   
-  gui.addTextfield("Import Path")
-     .setPosition(10, 10)
-     .setSize(200, 20)
-     .setAutoClear(false)
-     .setColor(color(255,255,255))
-     .setText("3dbuttons.dat")
-     .setGroup(fileCtrl)
-     ;
-  
-  gui.addButton("Import")
-    .setPosition(220, 10)
+  gui.addButton("Import from File...")
+    .setPosition(10, 10)
+    .setSize(80, 20)
     .setGroup(fileCtrl)
     ;
     
   gui.addTextlabel("Import Status")
-    .setPosition(230, 35)
+    .setPosition(20, 35)
     .setText("")
     .setGroup(fileCtrl)
     ;
   
-  gui.addTextfield("Export Path")
-     .setPosition(10, 70)
-     .setSize(200, 20)
-     .setAutoClear(false)
-     .setColor(color(255,255,255))
-     .setText("3dbuttons_export.dat")
-     .setGroup(fileCtrl)
-     ;
-  
-  gui.addButton("Export")
-    .setPosition(220, 70)
+  gui.addButton("Export to File...")
+    .setPosition(10, 50)
+    .setSize(80, 20)
     .setGroup(fileCtrl)
     ;
     
   gui.addTextlabel("Export Status")
-    .setPosition(230, 95)
+    .setPosition(20, 75)
     .setText("")
     .setGroup(fileCtrl)
     ;
   
-  
-  fileCtrl.close();
+  fileCtrl.open();
   
   gui.addToggle("Toggle Activation Type")
     .setPosition(20, height-40)
@@ -254,7 +239,8 @@ void makeGUI() {
 void setImportSuccess(boolean state) {
   String stateName = "FAILURE!";
   if(state) {
-    stateName = "SUCCESS!";
+    stateName = "";
+    fileCtrl.close();
   }
   gui.get(Textlabel.class, "Import Status").setText(stateName);
 }
@@ -278,8 +264,14 @@ void initTables() {
 }
 
 
-void export() {
-  String exportPath = gui.get(Textfield.class, "Export Path").getText();
+void export(File exportfile) {
+  if (exportfile == null) {
+    return;
+  }
+  
+  lastExportFile = exportfile;
+  
+  String exportPath = exportfile.getAbsolutePath();
   ArrayList<String> output = new ArrayList<String>();
   
   output.add("----- Created by BMS Cockpit Hotspot Visualizer v" + VERSION + " -----");
@@ -319,7 +311,11 @@ void export() {
   setExportSuccess(true);
 }
 
-void importHotspots() {
+void importHotspots(File selection) {
+  if (selection == null) {
+    return;
+  }
+  
   // clear any selection
   hoverIndex = -1;
   selectIndex = -1;
@@ -328,7 +324,7 @@ void importHotspots() {
   initTables();
   
   // Import the hotspots
-  String importPath = gui.get(Textfield.class, "Import Path").getText();
+  String importPath = selection.getAbsolutePath();
   String[] lines;
   try {
     lines = loadStrings(importPath);
@@ -651,11 +647,15 @@ public void controlEvent(ControlEvent theEvent) {
         hotspotWheel.set(selectIndex, wheel);
       }
       break;
-    case "Import":
-      importHotspots();
+    case "Import from File...":
+      selectInput("Select a .dat file to import:", "importHotspots");
       break;
-    case "Export":
-      export();
+    case "Export to File...":
+      if (lastExportFile != null) {
+        selectOutput("Select a .dat file to export:", "export", lastExportFile);
+      } else {
+        selectOutput("Select a .dat file to export:", "export");
+      }
       break;
   }
 }
