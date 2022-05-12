@@ -6,7 +6,7 @@ A tool to add, modify, and delete cockpit hotspots for Falcon BMS.
 
 ![Screenshot](https://raw.githubusercontent.com/musurca/bms_cockpit_hotspot_visualizer/main/img/screenshot.jpg)
 
-## INSTRUCTIONS:
+## INSTRUCTIONS
 
 1) Download the latest release and unzip to a new directory.
 2) Run BMS Cockpit Hotspot Visualizer.exe.
